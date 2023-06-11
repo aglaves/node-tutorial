@@ -1,18 +1,24 @@
 const express = require('express');
+const morgan = require('morgan');
+const mongoose = require('mongoose');
+const blogRoutes = require('./routes/blogRoutes');
 
 const app = express();
 
 app.set('view engine', 'ejs');
-app.listen(8888);
 
-const blogs = [
-    {title: 'Mr T. vs Bart Simpson', snippet: 'Mr. T crushes Bart!'},
-    {title: 'Mr T. vs Rocky', snippet: 'Rockey gets a lot of pain.'},
-    {title: 'Mr T. vs Yo Mama', snippet: 'No.'}
-]
+const dbConnection = 'mongodb://mongoadmin:secret@mongo:27017/nodejs?authSource=admin&retryWrites=true&w=majority';
+mongoose.connect(dbConnection, { useNewUrlParser: true, useUnifiedTopology: true}).then(() => {
+    console.log('Connected to Mongodb');
+    app.listen(8888);
+}).catch(err => console.log(err));
+
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true}));
+app.use(morgan('dev'));
 
 app.get('/', (request, response) => {
-    response.render('index', {title: 'Home', blogs});
+    response.redirect('/blogs');
 });
 
 app.get('/about', (request, response) => {
@@ -23,9 +29,7 @@ app.get('/about-node.js', (request, response) => {
     response.redirect('/about');
 });
 
-app.get('/blogs/create', (request, response) => {
-    response.render('create', {title: 'New Blog'});
-})
+app.use('/blogs', blogRoutes);
 
 app.use((request, response) => {
     response.status(404).render('404', {title: 'Mr. T Says'});

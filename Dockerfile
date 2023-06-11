@@ -4,4 +4,5 @@ EXPOSE 8888
 
 RUN npm install -g nodemon
 
-CMD ["node"]
+WORKDIR /usr/src/app/ 
+CMD ["nodemon", "app"]
